@@ -50,8 +50,9 @@ MOVE_SPEED = 5
 # 从已有模块中创建 gamestate 对象
 def create_game_state():
     # 你的实际创建方式
-    chimeras = [NormalChimera(), Chimera("内卷王", 8, 5), NormalChimera()]
-    tasks = [Task(), Task()]  # 任务属性在 Task 内随机生成
+    turn = 1
+    chimeras = [NormalChimera(), Chimera("内卷王", 8, 5), NormalChimera()] 
+    tasks = Task().turn_task(1)
     return GameState(chimeras, tasks)
 
 gamestate = create_game_state()
