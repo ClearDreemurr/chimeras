@@ -75,7 +75,7 @@ class GameState:
     def swap(self, chimera0, next):
         """
         placeA      placeB  ->  placeA  placeB
-        chimera0    next    ->  next    chimera0
+        chimera0    next    ->  next    chimera0 #change place.chimera AND chimera.place
         """
         place1, place2 = chimera0.place, next.place
         place1.chimera, place2.chimera = next, chimera0
