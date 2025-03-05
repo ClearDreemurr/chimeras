@@ -3,9 +3,9 @@ from task import *
 from gamestate import *
 
 def main():
-    chimeras = [NormalChimera(), Chimera("内卷王", 8, 5), NormalChimera()]
+    chimeras = [unnamed(), unnamed1()]
     turn_tasks = Task()
-    tasks = turn_tasks.turn_task(0)
+    tasks = turn_tasks.turn_task(1)
 
     gamestate = GameState(chimeras, tasks)
 
