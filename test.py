@@ -3,9 +3,8 @@ from task import *
 from gamestate import *
 
 def main():
-    chimeras = [unnamed(), unnamed1()]
-    turn_tasks = Task()
-    tasks = turn_tasks.turn_task(1)
+    chimeras = []
+    tasks = Task().turn_task(1)
 
     gamestate = GameState(chimeras, tasks)
 

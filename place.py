@@ -25,10 +25,13 @@ class place:
         ['aa', 'cc']
         >>> gs.place[0].next.chimera.name
         'cc'
+        >>> gs.place[1].chimera.place is gs.place[1] #IMPORTANT!!!!!!!!!!!!!!!!!!
+        True
         """
         self.chimera = None
         plc = self
-        while plc.next:
+        while plc.next and plc.next.chimera:
             plc.chimera = plc.next.chimera
+            plc.chimera.place = plc
             plc = plc.next
         plc.chimera = None

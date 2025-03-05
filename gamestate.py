@@ -1,5 +1,5 @@
 from place import *
-from chimera import unnamed6
+from chimera import Onlooker
 
 class GameState:
     def __init__(self, chimeras, tasks):
@@ -15,25 +15,28 @@ class GameState:
 
     def reparation_phase(self):
         for place in self.place:
-            place.chimera.action(self, 'prepare')
+            if place.chimera:
+                place.chimera.action(self, 'prepare')
     
     def work_phase(self):
         self.place[0].chimera.action(self, 'work')
 
     def settlement_phase(self):
         for place in self.place:
-            place.chimera.action(self, 'settle')
+            if place.chimera:
+                place.chimera.action(self, 'settle')
         if self.tasks[0].is_completed():
             self.tasks = self.tasks[1:]
         for place in self.place:
             if place.chimera and place.chimera.energy<=0:
                 place.remove_chimera()
+                place = None
                 self.len_chimeras -= 1
                 self.dead_skills()
 
 
     def end(self):
-        return not self.chimeras or not self.tasks
+        return self.len_chimeras == 0 or not self.tasks
     
     def complete(self):
         return not self.tasks
@@ -66,5 +69,15 @@ class GameState:
 
     def dead_skills(self):
         for place in self.place:
-            if isinstance(place.chimera, unnamed6):
+            if isinstance(place.chimera, Onlooker):
                 place.chimera.skill()
+            
+    def swap(self, chimera0, next):
+        """
+        placeA      placeB  ->  placeA  placeB
+        chimera0    next    ->  next    chimera0
+        """
+        place1, place2 = chimera0.place, next.place
+        place1.chimera, place2.chimera = next, chimera0
+        place1.chimera.place = place1
+        place2.chimera.place = place2

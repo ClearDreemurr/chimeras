@@ -3,14 +3,13 @@ from task import *
 from chimera import *
 
 def main():
-    gs = GameState([Chimera('aa', 0, 1), Chimera('bb', 0, 1), unnamed6()], [Task(20, 1)])
-    print(gs.place[2].chimera.name)
-    gs.update()
-    print(gs.place[1].chimera.name)
-    print(gs.place[1].chimera.efficiency)
-    gs.update()
-    print(gs.place[0].chimera.name)
-    print(gs.place[0].chimera.efficiency)
+    chimeras = [AbsenteeFreak(), AbsenteeMaster(), BadTempered(), ToughCookie(), Onlooker()]
+    tasks = Task().turn_task(1)
+    for chimera in chimeras:
+        chimera.efficiency += 2
+    gs = GameState(chimeras, tasks)
 
+    while not gs.end():
+        gs.update()
 
 main()
