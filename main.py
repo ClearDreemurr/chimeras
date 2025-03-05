@@ -8,6 +8,9 @@ def main():
     gs.update()
     print(gs.place[1].chimera.name)
     print(gs.place[1].chimera.efficiency)
+    gs.update()
+    print(gs.place[0].chimera.name)
+    print(gs.place[0].chimera.efficiency)
 
 
 main()
