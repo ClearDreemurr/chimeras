@@ -3,12 +3,7 @@ from task import *
 from chimera import *
 
 def main():
-    chimeras = [AbsenteeFreak(), AbsenteeMaster(), BadTempered(), ToughCookie(), Onlooker()]
-    tasks = Task().turn_task(1)
-    for chimera in chimeras:
-        chimera.efficiency += 2
-    gs = GameState(chimeras, tasks)
-
+    gs = GameState([Chimera('aa', 6, 6)], [Task(1, 1)], RuthlessDemon())
     while not gs.end():
         gs.update()
 

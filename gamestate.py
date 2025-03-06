@@ -1,5 +1,5 @@
 from place import *
-from chimera import Onlooker, name2
+from chimera import Onlooker, Bucktaker
 
 class GameState:
     def __init__(self, chimeras, tasks, leader=None):
@@ -8,8 +8,14 @@ class GameState:
         self.turns = 0
         self.place = self.make_place(chimeras)
         self.leader = leader
-        if leader:
-            leader.debut(self)
+        self.debut()
+
+    def debut(self):
+        if self.leader:
+            self.leader.debut(self)
+        for p in self.place:
+            if p.chimera:
+                p.chimera.debut(self)
 
     
     def update(self):
@@ -29,20 +35,20 @@ class GameState:
         for place in self.place:
             if place.chimera:
                 place.chimera.action(self, 'settle')
+        if self.leader:
+            self.leader.settlement_action(self)
         if self.tasks[0].is_completed():
             self.tasks = self.tasks[1:]
         for place in self.place:
             if place.chimera and place.chimera.energy<=0:
                 for p in self.place:
-                    if isinstance(p.chimera, name2):
+                    if isinstance(p.chimera, Bucktaker):
                         p.remove_chimera(self)
                         place.chimera.energy += 10
                         return
                 place.remove_chimera(self)
                 return
                 
-
-
     def end(self):
         return self.len_chimeras == 0 or not self.tasks
     
@@ -79,6 +85,8 @@ class GameState:
         for place in self.place:
             if isinstance(place.chimera, Onlooker):
                 place.chimera.skill()
+            if isinstance(place.chimera, Bucktaker):
+                place.next.exit(self)
 
             
     def swap(self, chimera0, next):
