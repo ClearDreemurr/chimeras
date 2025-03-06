@@ -56,8 +56,11 @@ class Chimera:
     def reduce_energy(self, amount, gamestate):
         self.energy -= amount
 
+    def debut(self, gamestate):#why????
+        pass
+
 class NormalChimera(Chimera):
-    nameset = ["摸鱼仔3 2", "压力怪5 3", "小坏蛋3 5", "真老实1 16"]
+    nameset = ["摸鱼仔3 2", "压力怪5 3", "小坏蛋3 5", "真老实1 16", "负能量7 2"]
     def __init__(self):
         limit_attri = 10
         energy = random.randint(1, limit_attri)
@@ -215,3 +218,126 @@ class Onlooker(Chimera):
         """
         self.energy += 2
         self.efficiency += 2
+
+class name1(Chimera):
+    def __init__(self, name="治愈师", efficiency=2, energy=5):
+        super().__init__(name, efficiency, energy)
+
+    def prepare_action(self, gamestate):
+        """
+        >>> from gamestate import *
+        >>> from task import *
+        >>> gs = GameState([Chimera('bb', 0, 1), name1()], [Task(20, 0)])
+        >>> gs.place[0].chimera.energy
+        1
+        >>> gs.update()
+        >>> gs.place[0].chimera.energy
+        2
+        """
+        self.place.last.chimera.energy += 1
+
+class name2(Chimera):
+    def __init__(self, name="背锅侠", efficiency=3, energy=6):
+        super().__init__(name, efficiency, energy)
+
+    def foo():
+        """
+        >>> from gamestate import *
+        >>> from task import *
+        >>> gs = GameState([Chimera('bb', 0, 2), name2()], [Task(20, 4)])
+        >>> gs.update()
+        >>> gs.place[0].chimera.energy
+        8
+        >>> gs.place[0].chimera.name
+        'bb'
+        >>> gs.place[1].chimera is None
+        True
+        """
+        return
+
+class name3(Chimera):
+    def __init__(self, name="小团体", efficiency=3, energy=3):
+        super().__init__(name, efficiency, energy)
+
+    def prepare_action(self, gamestate):
+        """
+        >>> from gamestate import *
+        >>> from task import *
+        >>> gs = GameState([Chimera('aa', 6, 6), Chimera('bb', 5, 5), Chimera('cc', 4, 4), name3(), Chimera('dd', 2, 2) ], [Task(20, 0)])
+        >>> [(p.chimera.efficiency, p.chimera.energy) for p in gs.place]
+        [(6, 6), (5, 5), (4, 4), (3, 3), (2, 2)]
+        >>> gs.update()
+        >>> [(p.chimera.efficiency, p.chimera.energy) for p in gs.place]
+        [(6, 5), (6, 5), (5, 4), (3, 3), (2, 1)]
+        """
+        up = [self.place.last, self.place.last.last]
+        for place in gamestate.place:
+            if place in up:
+                place.chimera.efficiency += 1
+            elif place is not self.place:
+                place.chimera.energy -= 1
+
+class name4(Chimera):
+    def __init__(self, name="画饼王", efficiency=2, energy=7):
+        super().__init__(name, efficiency, energy)
+
+    def debut(self, gamestate):
+        for place in gamestate.place:
+            #if place is not self.place:  undefined
+            if place.chimera:
+                place.chimera.efficiency+=8
+    
+    def prepare_action(self, gamestate):
+        """
+        >>> from gamestate import *
+        >>> from task import *
+        >>> gs = GameState([name4(), Chimera('aa', 6, 6), Chimera('dd', 2, 2) ], [Task(20, 5)])
+        >>> [p.chimera.efficiency for p in gs.place]
+        [10, 14, 10]
+        >>> gs.update()
+        >>> [p.chimera.efficiency for p in gs.place]
+        [8, 12, 8]
+        >>> gs.update()
+        >>> [p.chimera.efficiency for p in gs.place]
+        [12, 8]
+        """
+        for place in gamestate.place:
+            #if place is not self.place:  undefined
+            if place.chimera:
+                place.chimera.efficiency-=2
+
+
+class leaderChimera(Chimera):
+    def __init__(self, name):
+        """
+        >>> from gamestate import *
+        >>> from task import *
+        >>> gs = GameState([Chimera('bb', 0, 1), name1()], [Task(20, 0)])
+        >>> gs.leader
+        >>> gs = GameState([Chimera('bb', 0, 1), name1()], [Task(20, 0)], leaderChimera('aa'))
+        >>> gs.leader.name
+        'aa'
+        """
+        self.name = name    
+
+class manager(leaderChimera):
+    def __init__(self, name='职业经理'):
+        super().__init__(name)
+
+    def debut(self, gamestate):
+        """
+        >>> from gamestate import *
+        >>> from task import *
+        >>> gs = GameState([Chimera('bb', 0, 1), name1()], [Task(20, 0)], manager())
+        >>> gs.place[0].chimera.energy
+        4
+        >>> gs.place[0].chimera.efficiency
+        3
+        >>> gs.place[1].chimera.efficiency
+        5
+        >>> gs.place[1].chimera.energy
+        8
+        """
+        for place in gamestate.place:
+            place.chimera.energy += 3
+            place.chimera.efficiency += 3

@@ -10,7 +10,7 @@ class place:
     def add_chimera(self, chimera):
         self.chimera = chimera
 
-    def remove_chimera(self):
+    def remove_chimera(self, gamestate):
         """
         >>> from chimera import *
         >>> from gamestate import *
@@ -20,18 +20,20 @@ class place:
         ['aa', 'bb', 'cc']
         >>> gs.place[0].next.chimera.name
         'bb'
-        >>> gs.place[1].remove_chimera()
-        >>> [gs.place[i].chimera.name for i in range(gs.len_chimeras-1)]
+        >>> gs.place[1].remove_chimera(gs)
+        >>> [gs.place[i].chimera.name for i in range(gs.len_chimeras)]
         ['aa', 'cc']
         >>> gs.place[0].next.chimera.name
         'cc'
         >>> gs.place[1].chimera.place is gs.place[1] #IMPORTANT!!!!!!!!!!!!!!!!!!
         True
         """
-        self.chimera = None
         plc = self
+        plc.chimera = None
         while plc.next and plc.next.chimera:
             plc.chimera = plc.next.chimera
             plc.chimera.place = plc
             plc = plc.next
         plc.chimera = None
+        gamestate.len_chimeras -= 1
+        gamestate.dead_skills()
