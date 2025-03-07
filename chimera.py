@@ -2,6 +2,7 @@ import random
 import math
 
 class Chimera:
+    normal = False
     def __init__(self, name, efficiency, energy):
         self.name = name
         self.efficiency = efficiency
@@ -65,20 +66,17 @@ class Chimera:
         pass
 
 class NormalChimera(Chimera):
-    nameset = ["摸鱼仔3 2", "压力怪5 3", "小坏蛋3 5", "真老实1 16", "负能量7 2"]
+    chimera_set = [["摸鱼仔", 3, 2], ["压力怪", 5, 3], ["小坏蛋", 3, 5], ["真老实", 1, 16], ["负能量", 7, 2]]
+    normal = True
     def __init__(self):
-        limit_attri = 10
-        energy = random.randint(1, limit_attri)
-        efficiency = abs(limit_attri - energy + random.randint(-3, 1))
-
-        # 根据属性的总和或者单个属性的高低选择名称：
-        if energy <= limit_attri / 3:
-            name_list = ["最效率"]
-        elif energy <= limit_attri * 2 / 3:
-            name_list = ["最社畜"]
-        else:
-            name_list = ["真老实"]
-        name = random.choice(name_list)
+        """
+        >>> NormalChimera.chimera_set
+        [['摸鱼仔', 3, 2], ['压力怪', 5, 3], ['小坏蛋', 3, 5], ['真老实', 1, 16], ['负能量', 7, 2]]
+        """
+        idx = random.randint(0, 4)
+        name = NormalChimera.chimera_set[idx][0]
+        efficiency = NormalChimera.chimera_set[idx][1]
+        energy = NormalChimera.chimera_set[idx][2]
         super().__init__(name, efficiency, energy)
 
 class RatRaceKing(Chimera):
@@ -409,7 +407,7 @@ class Workaholic(Chimera):
         if gamestate.tasks[0].completed_chimera is None and gamestate.tasks[0].completion < gamestate.tasks[0].progress:
             gamestate.tasks[0].completed_chimera = self
 
-class name1(Chimera):
+class ShockForce(Chimera):
     def __init__(self, name="急先锋", efficiency=2, energy=5):
         super().__init__(name, efficiency, energy)
 
@@ -417,21 +415,53 @@ class name1(Chimera):
         """
         >>> from gamestate import *
         >>> from task import *
-        >>> gs = GameState([Chimera('aa', 6, 6), Disservicer(), name1()], [Task(20, 5)])
+        >>> gs = GameState([Chimera('aa', 6, 6), Disservicer(), ShockForce()], [Task(20, 5)])
         >>> gs.update()
         >>> [p.chimera.name for p in gs.place]
-        ["急先锋", "帮倒忙", "aa"]
-        >>> gs.chimera_place["name1"] is gs.place[0]
+        ['急先锋', 'aa', '帮倒忙']
+        >>> gs.place[0].chimera.energy
+        17
+        >>> gs.chimera_place["ShockForce"] is gs.place[0]
         True
         >>> gs.chimera_place["Disservicer"] is gs.place[2]
         True
         >>> gs.chimera_place["Chimera"] is gs.place[1]
         True
-        
         """
         if self.place.last.chimera:
             self.energy += 6
-            gamestate.swap(self, self.last)
+            gamestate.swap(self.place.last.chimera, self)
+
+class MasterOrdinaire(Chimera):
+    def __init__(self, name="平凡王", efficiency=7, energy=7):
+        super().__init__(name, efficiency, energy)
+
+    def debut(self, gamestate):
+        """
+        >>> from gamestate import *
+        >>> from task import *
+        >>> gs = GameState([Chimera('aa', 6, 6), NormalChimera(), MasterOrdinaire(), NormalChimera(), Onlooker()], [Task(20, 5)])
+        >>> gs.place[0].chimera.normal
+        False
+        >>> gs.place[1].chimera.normal
+        True
+        >>> gs.place[2].chimera.efficiency == gs.place[1].chimera.efficiency + 7 + gs.place[3].chimera.efficiency
+        True
+        >>> gs.place[2].chimera.energy == gs.place[1].chimera.energy + 7 + gs.place[3].chimera.energy
+        True
+        """
+        for p in gamestate.place:
+            if p.chimera.normal:
+                self.energy += p.chimera.energy
+                self.efficiency += p.chimera.efficiency
+
+class Complainer(Chimera):
+    def __init__(self, name="说怪话", efficiency=14, energy=1):
+        super().__init__(name, efficiency, energy)
+
+class Suffermaxxer(Chimera):
+    def __init__(self, name="受气包", efficiency=2, energy=5):
+        super().__init__(name, efficiency, energy)
 
 class leaderChimera(Chimera):
     def __init__(self, name):

@@ -39,8 +39,8 @@ class GameState:
         self.place[0].chimera.action(self, 'work')
 
     def additional_phase(self):
-        if "name1" in self.chimera_place:
-            self.rush(self.chimera_place["name1"].chimera)
+        if "ShockForce" in self.chimera_place:
+            self.rush(self.chimera_place["ShockForce"].chimera)
         if "Disservicer" in self.chimera_place:
             self.helpwork(self.chimera_place["Disservicer"].chimera)
         if "Creditstealer" in self.chimera_place:
@@ -55,16 +55,22 @@ class GameState:
         chimera.additional_action(self)
         if "Workaholic" in self.chimera_place:
             self.holicwork(self.chimera_place["Workaholic"].chimera)
+        if "ShockForce" in self.chimera_place:
+            self.rush(self.chimera_place["ShockForce"].chimera)
         self.praise(chimera)
 
     def stealwork(self, chimera):
         chimera.additional_action(self)
         if "Workaholic" in self.chimera_place:
             self.holicwork(self.chimera_place["Workaholic"].chimera)
+        if "ShockForce" in self.chimera_place:
+            self.rush(self.chimera_place["ShockForce"].chimera)
         self.praise(chimera)
 
     def holicwork(self, chimera):
         chimera.additional_action(self)
+        if "ShockForce" in self.chimera_place:
+            self.rush(self.chimera_place["ShockForce"].chimera)
         self.praise(chimera)
 
     def praise(self, chimera):
