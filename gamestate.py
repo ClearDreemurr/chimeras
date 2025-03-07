@@ -92,7 +92,7 @@ class GameState:
                 for p in self.place:
                     if isinstance(p.chimera, Bucktaker):
                         p.remove_chimera(self)
-                        place.chimera.energy += 10
+                        place.chimera.increase_energy(10, self)
                         return
                 place.remove_chimera(self)
                 return
@@ -139,7 +139,7 @@ class GameState:
     def dead_skills(self):
         for place in self.place:
             if isinstance(place.chimera, Onlooker):
-                place.chimera.skill()
+                place.chimera.skill(self)
             if isinstance(place.chimera, Bucktaker):
                 place.next.exit(self)
 

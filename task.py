@@ -11,6 +11,9 @@ class Task:
         self.progress = 0
         self.consumption= consumption
         self.completed_chimera = None
+
+    def do_progress(self, amount, gamestate):
+        self.progress+=amount
     
     def turn_task(self, turn):
         if turn > 0:
