@@ -1,16 +1,14 @@
 from place import *
-from chimera import Onlooker, Bucktaker, KindPraiser, CareerStandout, Workaholic
+from chimera import Onlooker, Bucktaker, KindPraiser, CareerStandout
 
 class GameState:
     def __init__(self, chimeras, tasks, leader=None):
         self.len_chimeras = len(chimeras)
         self.tasks = tasks
         self.turns = 0
+        self.chimera_place = {}
         self.place = self.make_place(chimeras)
         self.leader = leader
-        self.praiser = []
-        self.input_praiser()
-        self.ad_work = [p.chimera for p in self.place if isinstance(p.chimera, Workaholic)]
         self.debut()
 
     def input_praiser(self):
@@ -41,17 +39,40 @@ class GameState:
         self.place[0].chimera.action(self, 'work')
 
     def additional_phase(self):
-        for place in self.place[1:]:
-            if place.chimera:
-                self.additional_work(place.chimera)
-                    
-    def additional_work(self, chimera):
-        if chimera.action(self, 'addition'):
-                if self.praiser:
-                    for praiser in self.praiser:
-                        praiser.praise(chimera, self)
+        if "name1" in self.chimera.place:
+            self.rush(self.chimera.place["name1"].chimera)
+        if "Disservicer" in self.chimera_place:
+            self.helpwork(self.chimera_place["Disservicer"].chimera)
+        if "Creditstealer" in self.chimera_place:
+            self.stealwork(self.chimera_place["Creditstealer"].chimera)
+        if "Workaholic" in self.chimera_place:
+            self.holicwork(self.chimera_place["Workaholic"].chimera)
 
-    
+    def rush(self, chimera):
+        chimera.additional_action(self)
+
+    def helpwork(self, chimera):    
+        chimera.additional_action(self)
+        if "Workaholic" in self.chimera_place:
+            self.holicwork(self.chimera_place["Workaholic"].chimera)
+        self.praise(chimera)
+
+    def stealwork(self, chimera):
+        chimera.additional_action(self)
+        if "Workaholic" in self.chimera_place:
+            self.holicwork(self.chimera_place["Workaholic"].chimera)
+        self.praise(chimera)
+
+    def holicwork(self, chimera):
+        chimera.additional_action(self)
+        self.praise(chimera)
+
+    def praise(self, chimera):
+        if "KindPraiser" in self.chimera_place:
+            self.chimera_place["KindPraiser"].chimera.praise(chimera, self)
+        if isinstance(self.leader, CareerStandout):
+            self.leader.praise(chimera, self)
+
     def settlement_phase(self):
         for place in self.place:
             if place.chimera:
@@ -80,7 +101,7 @@ class GameState:
         """
         >>> from chimera import *
         >>> from task import *
-        >>> gs = GameState([Chimera("aa", 10, 100), NormalChimera(), NormalChimera()], [Task()])
+        >>> gs = GameState([Chimera("aa", 10, 100), NormalChimera(), Workaholic()], [Task()])
         >>> gs.place[0].name
         'place0'
         >>> gs.place[0].chimera.name
@@ -92,6 +113,12 @@ class GameState:
         True
         >>> gs.place[0].chimera.place is gs.place[0]
         True
+        >>> gs.chimera_place["Chimera"] is gs.place[0]
+        True
+        >>> gs.chimera_place["NormalChimera"] is gs.place[1]
+        True
+        >>> "Workaholic" in gs.chimera_place
+        True
         """
         places = []
         place0 = None
@@ -99,6 +126,7 @@ class GameState:
             place1 = place(f"place{i}", chimeras[i], place0)
             chimeras[i].place = place1
             places.append(place1)
+            self.chimera_place[chimeras[i].__class__.__name__] = place1
             place0 = place1
         return places
 
@@ -119,3 +147,4 @@ class GameState:
         place1.chimera, place2.chimera = next, chimera0
         place1.chimera.place = place1
         place2.chimera.place = place2
+        self.chimera_place[chimera0.__class__.__name__], self.chimera_place[next.__class__.__name__] = chimera0.place, next.place

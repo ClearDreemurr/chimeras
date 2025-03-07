@@ -47,7 +47,7 @@ class Chimera:
             gamestate.tasks[0].completed_chimera = self
 
     def additional_action(self, gamestate):
-        return False
+        pass 
 
     def settlement_action(self, gamestate):
         pass
@@ -335,7 +335,6 @@ class Creditstealer(Chimera):
             gamestate.tasks[0].progress += self.efficiency
             if gamestate.tasks[0].completed_chimera is None:
                 gamestate.tasks[0].completed_chimera = self
-        return True
 
 class Disservicer(Chimera):
     def __init__(self, name="帮倒忙", efficiency=-1, energy=5):
@@ -353,7 +352,6 @@ class Disservicer(Chimera):
         gamestate.tasks[0].progress += self.efficiency
         if gamestate.tasks[0].completed_chimera is None and gamestate.tasks[0].completion < gamestate.tasks[0].progress:
             gamestate.tasks[0].completed_chimera = self
-        return True
 
 class KindPraiser(Chimera):
     def __init__(self, name="小夸夸", efficiency=3, energy=3):
@@ -377,33 +375,62 @@ class Workaholic(Chimera):
     def __init__(self, name="工作狂", efficiency=6, energy=10):
         super().__init__(name, efficiency, energy)
 
-    #def additional_action(self, gamestate):
-    #    """
-    #    >>> from gamestate import *
-    #    >>> from task import *
-    #    >>> gs = GameState([Chimera('aa', 6, 6), Disservicer(), KindPraiser(), Workaholic(), Creditstealer()], [Task(20, 5)])
-    #    >>> tmp = gs.tasks[0]
-    #    >>> gs.update()
-    #    >>> gs.place[1].chimera.efficiency
-    #    -1
-    #    >>> gs.place[3].chimera.efficiency
-    #    12
-    #    >>> tmp.completed_chimera is gs.place[4].chimera
-    #    True
-    #    >>> gs = GameState([Chimera('aa', 6, 6), Disservicer(), KindPraiser(), Workaholic(), Creditstealer()], [Task(7, 5)])
-    #    >>> tmp = gs.tasks[0]
-    #    >>> gs.update()
-    #    >>> gs.place[1].chimera.efficiency
-    #    -1
-    #    >>> gs.place[3].chimera.efficiency
-    #    12
-    #    >>> tmp.completed_chimera is gs.place[3].chimera
-    #    True
-    #    """
-    #    gamestate.tasks[0].progress += self.efficiency / 2
-    #    if gamestate.tasks[0].completed_chimera is None and gamestate.tasks[0].completion < gamestate.tasks[0].progress:
-    #        gamestate.tasks[0].completed_chimera = self
-    #    return True
+    def additional_action(self, gamestate):
+        """
+        >>> from gamestate import *
+        >>> from task import *
+        >>> gs = GameState([Chimera('aa', 6, 6), Disservicer(), KindPraiser(), Workaholic(), Creditstealer()], [Task(20, 5)])
+        >>> tmp = gs.tasks[0]
+        >>> gs.update()
+        >>> gs.place[1].chimera.efficiency
+        -1
+        >>> gs.place[3].chimera.efficiency
+        12
+        >>> tmp.completed_chimera is gs.place[4].chimera
+        True
+        >>> gs = GameState([Chimera('aa', 6, 6), Disservicer(), KindPraiser(), Workaholic(), Creditstealer()], [Task(7, 5)])
+        >>> tmp = gs.tasks[0]
+        >>> gs.update()
+        >>> gs.place[1].chimera.efficiency
+        -1
+        >>> gs.place[3].chimera.efficiency
+        12
+        >>> tmp.completed_chimera is gs.place[3].chimera
+        True
+        """
+        gamestate.tasks[0].progress += self.efficiency / 2
+        if gamestate.tasks[0].completed_chimera is None and gamestate.tasks[0].completion < gamestate.tasks[0].progress:
+            gamestate.tasks[0].completed_chimera = self
+        return True
+    
+    def additional_action(self, gamestate):
+        gamestate.tasks[0].progress += self.efficiency / 2
+        if gamestate.tasks[0].completed_chimera is None and gamestate.tasks[0].completion < gamestate.tasks[0].progress:
+            gamestate.tasks[0].completed_chimera = self
+
+class name1(Chimera):
+    def __init__(self, name="急先锋", efficiency=2, energy=5):
+        super().__init__(name, efficiency, energy)
+
+    def additional_action(self, gamestate):
+        """
+        >>> from gamestate import *
+        >>> from task import *
+        >>> gs = GameState([Chimera('aa', 6, 6), Disservicer(), name1()], [Task(20, 5)])
+        >>> gs.update()
+        >>> [p.chimera.name for p in gs.place]
+        ["急先锋", "帮倒忙", "aa"]
+        >>> gs.chimera_place["name1"] is gs.place[0]
+        True
+        >>> gs.chimera_place["Disservicer"] is gs.place[2]]
+        True
+        >>> gs.chimera_place["Chimera"] is gs.place[1]
+        True
+        
+        """
+        if self.place.last.chimera:
+            self.energy += 6
+            gamestate.swap(self, self.last)
 
 class leaderChimera(Chimera):
     def __init__(self, name):
@@ -468,4 +495,26 @@ class CareerStandout(leaderChimera):
             place.chimera.efficiency += 2
 
     def praise(self, praised, gamestate):
-        praised.efficiency += 2
+        """
+        >>> from gamestate import *
+        >>> from task import *
+        >>> gs = GameState([Chimera('aa', 6, 6), Disservicer(), KindPraiser(), Workaholic(), Creditstealer()], [Task(25, 5)], CareerStandout())
+        >>> tmp = gs.tasks[0]
+        >>> gs.update()
+        >>> gs.place[1].chimera.efficiency
+        2
+        >>> gs.place[3].chimera.efficiency
+        17
+        >>> tmp.completed_chimera is gs.place[4].chimera
+        True
+        >>> gs = GameState([Chimera('aa', 6, 6), Disservicer(), KindPraiser(), Workaholic(), Creditstealer()], [Task(10, 5)], CareerStandout())
+        >>> tmp = gs.tasks[0]
+        >>> gs.update()
+        >>> gs.place[1].chimera.efficiency
+        2
+        >>> gs.place[3].chimera.efficiency
+        17
+        >>> tmp.completed_chimera is gs.place[3].chimera
+        True
+        """
+        praised.efficiency += 1
