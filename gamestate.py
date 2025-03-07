@@ -4,6 +4,7 @@ from chimera import Onlooker, Bucktaker, KindPraiser, CareerStandout
 class GameState:
     def __init__(self, chimeras, tasks, leader=None):
         self.len_chimeras = len(chimeras)
+        self.chimeras = chimeras #保留所有奇美拉的状态，哪怕阵亡
         self.tasks = tasks
         self.turns = 0
         self.chimera_place = {}
@@ -38,14 +39,15 @@ class GameState:
     def work_phase(self):
         self.place[0].chimera.action(self, 'work')
 
-    def additional_phase(self):
-        if "ShockForce" in self.chimera_place:
+    def additional_phase(self): #coooooooooooooooooooooooooooooooooooooooolllllllllllllllllllllllllllllllllllllllllllllll
+        add_dict = dict(list(self.chimera_place.items())[1:])
+        if "ShockForce" in add_dict:
             self.rush(self.chimera_place["ShockForce"].chimera)
-        if "Disservicer" in self.chimera_place:
+        if "Disservicer" in add_dict:
             self.helpwork(self.chimera_place["Disservicer"].chimera)
-        if "Creditstealer" in self.chimera_place:
+        if "Creditstealer" in add_dict:
             self.stealwork(self.chimera_place["Creditstealer"].chimera)
-        if "Workaholic" in self.chimera_place:
+        if "Workaholic" in add_dict:
             self.holicwork(self.chimera_place["Workaholic"].chimera)
 
     def rush(self, chimera):
@@ -89,13 +91,12 @@ class GameState:
             self.tasks = self.tasks[1:]
         for place in self.place:
             if place.chimera and place.chimera.energy<=0:
-                for p in self.place:
-                    if isinstance(p.chimera, Bucktaker):
-                        p.remove_chimera(self)
-                        place.chimera.increase_energy(10, self)
-                        return
-                place.remove_chimera(self)
-                return
+                if "Bucktaker" in self.chimera_place:
+                    self.chimera_place["Bucktaker"].remove_chimera(self)
+                    place.chimera.increase_energy(10, self)
+                else:
+                    self.dead_skills()
+                    place.remove_chimera(self)
                 
     def end(self):
         return self.len_chimeras == 0 or not self.tasks
@@ -107,7 +108,7 @@ class GameState:
         """
         >>> from chimera import *
         >>> from task import *
-        >>> gs = GameState([Chimera("aa", 10, 100), NormalChimera(), Workaholic()], [Task()])
+        >>> gs = GameState([Chimera("aa", 10, 100), OldHonest(), Workaholic()], [Task()])
         >>> gs.place[0].name
         'place0'
         >>> gs.place[0].chimera.name
@@ -121,7 +122,7 @@ class GameState:
         True
         >>> gs.chimera_place["Chimera"] is gs.place[0]
         True
-        >>> gs.chimera_place["NormalChimera"] is gs.place[1]
+        >>> gs.chimera_place["OldHonest"] is gs.place[1]
         True
         >>> "Workaholic" in gs.chimera_place
         True
@@ -137,12 +138,12 @@ class GameState:
         return places
 
     def dead_skills(self):
-        for place in self.place:
-            if isinstance(place.chimera, Onlooker):
-                place.chimera.skill(self)
-            if isinstance(place.chimera, Bucktaker):
-                place.next.exit(self)
-
+        if "Onlooker" in self.chimera_place:
+            self.chimera_place["Onlooker"].chimera.skill(self)
+        if "WorkDitcher" in self.chimera_place:
+            self.chimera_place["WorkDitcher"].chimera.skill(self)
+        
+            
             
     def swap(self, chimera0, next):
         """

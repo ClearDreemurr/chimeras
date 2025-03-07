@@ -8,6 +8,8 @@ class Chimera:
         self.efficiency = efficiency
         self.energy = energy
         self.place = None
+        self.skill_text = "skill"
+        self.dialogs = "good job"
 
     def action(self, gamestate, phase):
         if phase == 'prepare':
@@ -74,18 +76,32 @@ class Chimera:
     def debut(self, gamestate):#why????
         pass
 
+    def is_resting(self):
+        return self.energy <= 0
+    
 class NormalChimera(Chimera):
-    chimera_set = [["摸鱼仔", 3, 2], ["压力怪", 5, 3], ["小坏蛋", 3, 5], ["真老实", 1, 16], ["负能量", 7, 2]]
     normal = True
-    def __init__(self):
-        """
-        >>> NormalChimera.chimera_set
-        [['摸鱼仔', 3, 2], ['压力怪', 5, 3], ['小坏蛋', 3, 5], ['真老实', 1, 16], ['负能量', 7, 2]]
-        """
-        idx = random.randint(0, 4)
-        name = NormalChimera.chimera_set[idx][0]
-        efficiency = NormalChimera.chimera_set[idx][1]
-        energy = NormalChimera.chimera_set[idx][2]
+    def __init__(self, name, efficiency, energy):
+        super().__init__(name, efficiency, energy)
+
+class Uber_Negative(NormalChimera):
+    def __init__(self, name="负能量", efficiency=7, energy=2):
+        super().__init__(name, efficiency, energy)
+
+class OldHonest(NormalChimera):
+    def __init__(self, name="真老实", efficiency=1, energy=16):
+        super().__init__(name, efficiency, energy)
+
+class PressureMonster(NormalChimera):
+    def __init__(self, name="压力怪", efficiency=5, energy=3):
+        super().__init__(name, efficiency, energy)
+
+class LittleVillain(NormalChimera):
+    def __init__(self, name="小坏蛋", efficiency=3, energy=5):
+        super().__init__(name, efficiency, energy)
+
+class Slacker(NormalChimera):
+    def __init__(self, name="摸鱼仔", efficiency=3, energy=2):
         super().__init__(name, efficiency, energy)
 
 class RatRaceKing(Chimera):
@@ -209,7 +225,7 @@ class Onlooker(Chimera):
         """
         >>> from gamestate import *
         >>> from task import *
-        >>> gs = GameState([Chimera('aa', 0, 1), Chimera('bb', 0, 1), Onlooker()], [Task(20, 1)])
+        >>> gs = GameState([Chimera('aa', 0, 1), Slacker(), Onlooker()], [Task(20, 5)])
         >>> gs.place[2].chimera.name
         '看乐子'
         >>> gs.place[2].chimera.efficiency
@@ -265,6 +281,8 @@ class Bucktaker(Chimera):
         'bb'
         >>> gs.place[1].chimera is None
         True
+        >>> len(gs.chimeras)
+        2
         """
         return
 
@@ -320,7 +338,23 @@ class EmptyPromises(Chimera):
 class WorkDitcher(Chimera):
     def __init__(self, name="跑路侠", efficiency=1, energy=1):
         super().__init__(name, efficiency, energy)
-
+    
+    def skill(self, gamestate):
+        """
+        >>> from gamestate import *
+        >>> from task import *
+        >>> gs = GameState([WorkDitcher(), Chimera('dd', 2, 2)], [Task(20, 5)])
+        >>> gs.update()
+        >>> len(gs.chimera_place)
+        0
+        >>> gs.chimeras[1].is_alive()
+        True
+        """
+        self.place.next.remove_chimera(gamestate)
+        for p in gamestate.place:
+            if p.chimera:
+                p.chimera.increase_energy(8, gamestate)
+    
 class Creditstealer(Chimera):
     def __init__(self, name="抢功劳", efficiency=15, energy=2):
         super().__init__(name, efficiency, energy)
@@ -443,7 +477,7 @@ class MasterOrdinaire(Chimera):
         """
         >>> from gamestate import *
         >>> from task import *
-        >>> gs = GameState([Chimera('aa', 6, 6), NormalChimera(), MasterOrdinaire(), NormalChimera(), Onlooker()], [Task(20, 5)])
+        >>> gs = GameState([Chimera('aa', 6, 6), OldHonest(), MasterOrdinaire(), OldHonest(), Onlooker()], [Task(20, 5)])
         >>> gs.place[0].chimera.normal
         False
         >>> gs.place[1].chimera.normal

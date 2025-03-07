@@ -28,22 +28,14 @@ class place:
         >>> gs.place[1].chimera.place is gs.place[1] #IMPORTANT!!!!!!!!!!!!!!!!!!
         True
         """
+        gamestate.chimera_place.pop(self.chimera.__class__.__name__)
         plc = self
         plc.chimera = None
         while plc.next and plc.next.chimera:
             plc.chimera = plc.next.chimera
             plc.chimera.place = plc
+            gamestate.chimera_place[plc.chimera.__class__.__name__] = plc
             plc = plc.next
         plc.chimera = None
         gamestate.len_chimeras -= 1
-        gamestate.dead_skills()
 
-    def exit(self, gamestate):
-        plc = self
-        plc.chimera = None
-        while plc.next and plc.next.chimera:
-            plc.chimera = plc.next.chimera
-            plc.chimera.place = plc
-            plc = plc.next
-        plc.chimera = None
-        gamestate.len_chimeras -= 1
