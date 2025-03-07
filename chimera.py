@@ -158,7 +158,8 @@ class AbsenteeFreak(Chimera):
         '请假狂'
         >>> gs.place[2].chimera.efficiency
         4
-        
+        >>> gs.chimera_place["AbsenteeFreak"] is gs.place[2]
+        True
         """
         super().reduce_energy(amount, gamestate)
         if self.place.next.chimera:
@@ -422,7 +423,7 @@ class name1(Chimera):
         ["急先锋", "帮倒忙", "aa"]
         >>> gs.chimera_place["name1"] is gs.place[0]
         True
-        >>> gs.chimera_place["Disservicer"] is gs.place[2]]
+        >>> gs.chimera_place["Disservicer"] is gs.place[2]
         True
         >>> gs.chimera_place["Chimera"] is gs.place[1]
         True
