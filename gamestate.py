@@ -1,5 +1,5 @@
 from place import *
-from chimera import Onlooker, Bucktaker
+from chimera import Onlooker, Bucktaker, KindPraiser, CareerStandout, Workaholic
 
 class GameState:
     def __init__(self, chimeras, tasks, leader=None):
@@ -8,7 +8,15 @@ class GameState:
         self.turns = 0
         self.place = self.make_place(chimeras)
         self.leader = leader
+        self.praiser = []
+        self.input_praiser()
+        self.ad_work = [p.chimera for p in self.place if isinstance(p.chimera, Workaholic)]
         self.debut()
+
+    def input_praiser(self):
+        self.praiser.extend([p.chimera for p in self.place if isinstance(p.chimera, KindPraiser)])
+        if isinstance(self.leader, CareerStandout):
+            self.praiser.append(self.leader)
 
     def debut(self):
         if self.leader:
@@ -21,6 +29,7 @@ class GameState:
     def update(self):
         self.reparation_phase()
         self.work_phase()
+        self.additional_phase()
         self.settlement_phase()
 
     def reparation_phase(self):
@@ -31,6 +40,18 @@ class GameState:
     def work_phase(self):
         self.place[0].chimera.action(self, 'work')
 
+    def additional_phase(self):
+        for place in self.place[1:]:
+            if place.chimera:
+                self.additional_work(place.chimera)
+                    
+    def additional_work(self, chimera):
+        if chimera.action(self, 'addition'):
+                if self.praiser:
+                    for praiser in self.praiser:
+                        praiser.praise(chimera, self)
+
+    
     def settlement_phase(self):
         for place in self.place:
             if place.chimera:
