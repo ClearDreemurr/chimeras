@@ -1,5 +1,5 @@
 from place import *
-from chimera import Onlooker, Bucktaker, KindPraiser, CareerStandout
+from chimera import KindPraiser, CareerStandout
 
 class GameState:
     def __init__(self, chimeras, tasks, leader=None):
@@ -142,8 +142,6 @@ class GameState:
             self.chimera_place["Onlooker"].chimera.skill(self)
         if "WorkDitcher" in self.chimera_place:
             self.chimera_place["WorkDitcher"].chimera.skill(self)
-        
-            
             
     def swap(self, chimera0, next):
         """

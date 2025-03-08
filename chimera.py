@@ -63,15 +63,19 @@ class Chimera:
     
     def reduce_energy(self, amount, gamestate):
         self.energy -= amount
+        #show(self, amount, "energy")
 
     def increase_energy(self, amount, gamestate):
         self.energy += amount
+        #show(self, amount, "energy")
 
     def reduce_efficiency(self, amount, gamestate):
         self.efficiency -= amount
+        #show(self, amount, "efficiency")
 
     def increase_efficiency(self, amount, gamestate):
         self.efficiency += amount
+        #show(self, amount, "efficiency")
 
     def debut(self, gamestate):#why????
         pass
