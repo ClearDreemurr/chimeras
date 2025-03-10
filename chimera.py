@@ -3,12 +3,12 @@ import math
 
 class Chimera:
     normal = False
+    skill_text = None
     def __init__(self, name, efficiency, energy):
         self.name = name
         self.efficiency = efficiency
         self.energy = energy
         self.place = None
-        self.skill_text = "skill"
         self.dialogs = "good job"
 
     def action(self, gamestate, phase):
@@ -85,6 +85,7 @@ class Chimera:
     
 class NormalChimera(Chimera):
     normal = True
+    skill_text = ""
     def __init__(self, name, efficiency, energy):
         super().__init__(name, efficiency, energy)
 
@@ -109,6 +110,7 @@ class Slacker(NormalChimera):
         super().__init__(name, efficiency, energy)
 
 class RatRaceKing(Chimera):
+    skill_text = "完成工作时，精力+3，效率+2"
     def __init__(self, name="内卷王", efficiency=3, energy=8):
         super().__init__(name, efficiency, energy)
 
@@ -118,6 +120,7 @@ class RatRaceKing(Chimera):
             super().increase_efficiency(2, gamestate)
 
 class BadTempered(Chimera):
+    skill_text = "损失精力时使下一只奇美拉精力—1"
     def __init__(self, name="坏脾气", efficiency=2, energy=9):
         super().__init__(name, efficiency, energy)
 
@@ -137,6 +140,8 @@ class BadTempered(Chimera):
             self.place.next.chimera.reduce_energy(1, gamestate)
 
 class ToughCookie(Chimera):
+    skill_text = "损失精力时使前后两只奇美拉效率+1"
+
     def __init__(self, name='抗压包', efficiency=2, energy=5):
         super().__init__(name, efficiency, energy)
 
@@ -164,6 +169,7 @@ class ToughCookie(Chimera):
             self.place.last.chimera.increase_efficiency(1, gamestate)
 
 class AbsenteeFreak(Chimera):
+    skill_text = "损失精力时与后一只奇美拉交换位置并+2效率"
     def __init__(self, name="请假狂", efficiency=2, energy=7):
         super().__init__(name, efficiency, energy)
 
@@ -194,6 +200,7 @@ class AbsenteeFreak(Chimera):
             gamestate.swap(self, self.place.next.chimera)
 
 class AbsenteeMaster(Chimera):
+    skill_text = "损失精力时与后一只奇美拉交换位置并+3精力"
     def __init__(self, name='请假王', efficiency=6, energy=3):
         super().__init__(name, efficiency, energy)
 
@@ -222,6 +229,7 @@ class AbsenteeMaster(Chimera):
             gamestate.swap(self, self.place.next.chimera)
 
 class Onlooker(Chimera):
+    skill_text = "有奇美拉累倒时+2精力，效率"
     def __init__(self, name='看乐子', efficiency=3, energy=3):
         super().__init__(name, efficiency, energy)
     
@@ -253,6 +261,7 @@ class Onlooker(Chimera):
         self.increase_efficiency(2, gamestate)
 
 class Healer(Chimera):
+    skill_text = "回合开始时使前一只奇美拉精力+1"
     def __init__(self, name="治愈师", efficiency=2, energy=5):
         super().__init__(name, efficiency, energy)
 
@@ -270,6 +279,7 @@ class Healer(Chimera):
         self.place.last.chimera.increase_energy(1, gamestate)
 
 class Bucktaker(Chimera):
+    skill_text = "有奇美拉累倒时使其精力+10，自身逃离工作"
     def __init__(self, name="背锅侠", efficiency=3, energy=6):
         super().__init__(name, efficiency, energy)
 
@@ -291,6 +301,7 @@ class Bucktaker(Chimera):
         return
 
 class SmallGroup(Chimera):
+    skill_text = "回合开始时使前面两只奇美拉效率+1，其余奇美拉精力-1"
     def __init__(self, name="小团体", efficiency=3, energy=3):
         super().__init__(name, efficiency, energy)
 
@@ -313,6 +324,7 @@ class SmallGroup(Chimera):
                 place.chimera.reduce_energy(1, gamestate)
 
 class EmptyPromises(Chimera):
+    skill_text = "登场时使所有奇美拉效率+8，回合开始时，若它在场则所有奇美拉效率-2"
     def __init__(self, name="画饼王", efficiency=2, energy=7):
         super().__init__(name, efficiency, energy)
 
@@ -340,6 +352,7 @@ class EmptyPromises(Chimera):
                 place.chimera.reduce_efficiency(2, gamestate)
 
 class WorkDitcher(Chimera):
+    skill_text = "累倒时带着后一只奇美拉一起逃离工作并使所有奇美拉精力+8"
     def __init__(self, name="跑路侠", efficiency=1, energy=1):
         super().__init__(name, efficiency, energy)
     
@@ -360,6 +373,7 @@ class WorkDitcher(Chimera):
                 p.chimera.increase_energy(8, gamestate)
     
 class Creditstealer(Chimera):
+    skill_text = "同伴工作时，若自身效率>=剩余工作进度，则进行追加工作完成该工作"
     def __init__(self, name="抢功劳", efficiency=15, energy=2):
         super().__init__(name, efficiency, energy)
 
@@ -383,6 +397,7 @@ class Creditstealer(Chimera):
                 gamestate.tasks[0].completed_chimera = self
 
 class Disservicer(Chimera):
+    skill_text = "同伴工作时发动一次追加工作"
     def __init__(self, name="帮倒忙", efficiency=-1, energy=5):
         super().__init__(name, efficiency, energy)
         
@@ -400,6 +415,7 @@ class Disservicer(Chimera):
             gamestate.tasks[0].completed_chimera = self
 
 class KindPraiser(Chimera):
+    skill_text = "同伴进行追加工作时，使其效率+2"
     def __init__(self, name="小夸夸", efficiency=3, energy=3):
         super().__init__(name, efficiency, energy)
 
@@ -418,6 +434,7 @@ class KindPraiser(Chimera):
             praised.increase_efficiency(2, gamestate)
     
 class Workaholic(Chimera):
+    skill_text = "同伴进行工作或追加工作时，进行一次自身50%效率的追加工作"
     def __init__(self, name="工作狂", efficiency=6, energy=10):
         super().__init__(name, efficiency, energy)
 
@@ -449,6 +466,7 @@ class Workaholic(Chimera):
             gamestate.tasks[0].completed_chimera = self
 
 class ShockForce(Chimera):
+    skill_text = "同伴发动工作或追加工作时，与前一只奇美拉交换位置并+6精力"
     def __init__(self, name="急先锋", efficiency=2, energy=5):
         super().__init__(name, efficiency, energy)
 
@@ -474,6 +492,7 @@ class ShockForce(Chimera):
             gamestate.swap(self.place.last.chimera, self)
 
 class MasterOrdinaire(Chimera):
+    skill_text = "登场时，获得场上所有无特性同伴100%的精力和效率（单次上限25）"
     def __init__(self, name="平凡王", efficiency=7, energy=7):
         super().__init__(name, efficiency, energy)
 
@@ -495,12 +514,13 @@ class MasterOrdinaire(Chimera):
         total_efficiency = 0
         for p in gamestate.place:
             if p.chimera.normal:
-                total_energy += p.chimera.energy
-                total_efficiency += p.chimera.efficiency
+                total_energy += min(25, p.chimera.energy)
+                total_efficiency += min(25, p.chimera.efficiency)
         self.increase_energy(total_energy, gamestate)
         self.increase_efficiency(total_efficiency, gamestate)
 
 class Complainer(Chimera):
+    skill_text = "使完成工作的同伴+4效率"
     def __init__(self, name="说怪话", efficiency=14, energy=1):
         super().__init__(name, efficiency, energy)
 
@@ -527,6 +547,7 @@ class Complainer(Chimera):
             gamestate.tasks[0].completed_chimera.increase_efficiency(4,gamestate)
 
 class Suffermaxxer(Chimera):
+    skill_text = "损失精力时所有同伴效率+1"
     def __init__(self, name="受气包", efficiency=2, energy=5):
         super().__init__(name, efficiency, energy)
 
@@ -560,6 +581,7 @@ class leaderChimera(Chimera):
         self.name = name    
 
 class ProfessionalManager(leaderChimera):
+    skill_text = "登场时全体奇美拉+3精力，效率"
     def __init__(self, name='职业经理'):
         super().__init__(name)
 
@@ -582,6 +604,7 @@ class ProfessionalManager(leaderChimera):
             place.chimera.increase_efficiency (3, gamestate)
 
 class RuthlessDemon(leaderChimera):
+    skill_text = "完成工作的奇美拉+4效率"
     def __init__(self, name="严酷恶魔"):
         super().__init__(name)
 
@@ -610,6 +633,7 @@ class RuthlessDemon(leaderChimera):
             gamestate.tasks[0].completed_chimera.increase_efficiency(5, gamestate)
 
 class CareerStandout(leaderChimera):
+    skill_text = "登场时全体奇美拉+2效率，进行追加工作时效率+1"
     def __init__(self, name="职场清流"):
         super().__init__(name)
 
