@@ -1,5 +1,7 @@
 import random
 import math
+from event_manager import publish
+
 
 class Task:
     def __init__(self, completion=None, consumption=None):
@@ -14,7 +16,8 @@ class Task:
 
     def do_progress(self, amount, gamestate):
         self.progress+=amount
-    
+        publish("attribute_change", obj=self, amount=amount, attribute="progress")
+
     def turn_task(self, turn):
         if turn > 0:
             tasks=[]

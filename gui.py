@@ -5,11 +5,14 @@ from chimera import *  # 假设这些类定义在 chimera 模块中
 from task import Task                   # 任务类
 from gamestate import GameState
 from place import place
+from event_manager import register
 
-chimeras = [AbsenteeFreak(), AbsenteeMaster(), BadTempered(), ToughCookie(), Onlooker()]
+chimeras = [BadTempered(), ToughCookie(), Onlooker()]
 tasks = Task().turn_task(1)
 leader = CareerStandout()
 
+# --- 获取 gamestate 对象 ---
+gamestate = GameState(chimeras, tasks, leader)
 
 # 尝试加载支持中文的字体，否则使用默认字体
 pygame.font.init()
@@ -55,7 +58,7 @@ TASK_WIDTH = 200
 TASK_HEIGHT = 200
 
 # 动画移动速度（像素/帧）
-MOVE_SPEED = 5
+MOVE_SPEED = 100
 
 # --- GUI 层计算位置 ---
 def compute_place_positions(place_list):
@@ -79,13 +82,57 @@ def compute_task_position():
 
     return [x, y]
 
-# --- 获取 gamestate 对象 ---
-gamestate = GameState(chimeras, tasks, leader)
 
 # 初始计算位置
 target_positions = compute_place_positions(gamestate.place)
 current_positions = [pos[:] for pos in target_positions]
 task_position = compute_task_position()
+
+def handle_attribute_change(obj, amount, attribute):
+    # 根据 obj 的类型判断是奇美拉还是任务，并获取它所在的显示区域
+    # 例如：
+    if hasattr(obj, "place") and obj.place is not None:
+        # 找到奇美拉在 gamestate.place 中的索引，计算显示位置
+        index = None
+        for idx, p in enumerate(gamestate.place):
+            if p == obj.place:
+                index = idx
+                break
+        offset = -30 if attribute == 'energy' else 30
+        if index is not None:
+            pos = current_positions[index]
+            display_pos = (pos[0] + PLACE_WIDTH // 2 - offset, pos[1] - 15)
+        else:
+            display_pos = (0, 0)
+    else:
+        display_pos = (task_position[0] + TASK_WIDTH // 2, task_position[1] - 15)
+    
+    # 绘制浮动数字并暂停1秒
+    change_text, color = f"{amount}", GRAY
+    if amount > 0:
+        change_text, color = f"+{amount}", GREEN
+    draw_floating_number(display_pos, change_text, color)
+
+# 记录当前需要显示技能描述的奇美拉
+skill_to_display = None  
+# 事件管理器：显示技能文本
+def show_skill_handler(chimera=None):
+    global skill_to_display
+    if chimera:
+        skill_to_display = chimera  # 记录当前奇美拉
+    #pygame.Rect(500, 500, int(WIDTH * 0.2), HEIGHT - 150)
+    #draw_skill_box(chimera)
+    
+# 事件管理器：隐藏技能文本
+def hide_skill_handler(chimera=None):
+    global skill_to_display
+    if skill_to_display == chimera:
+        skill_to_display = None  # 让文本消失
+
+# 注册事件
+register("show_skill", show_skill_handler)
+register("hide_skill", hide_skill_handler)
+register("attribute_change", handle_attribute_change)
 
 # --- 绘制函数 ---
 def draw_places(screen, place_list, positions):
@@ -156,10 +203,65 @@ def draw_task(screen, task, pos):
     prog_rect = prog_surf.get_rect(bottomright=(rect.right-50, rect.bottom-5))
     screen.blit(prog_surf, prog_rect)
     
+def wrap_text_chinese(text, font, max_width):
+    """
+    按字符对中文文本进行自动换行。
+    返回一个字符串列表，每个元素代表一行文本。
+    """
+    lines = []
+    current_line = ""
+    for char in text:
+        test_line = current_line + char
+        if font.size(test_line)[0] <= max_width:
+            current_line = test_line
+        else:
+            # 当前行已经到达最大宽度，换行
+            lines.append(current_line)
+            current_line = char
+    # 把最后一行加入
+    if current_line:
+        lines.append(current_line)
+    return lines
+
+def render_colored_text(surface, text, font, x, y):
+    """
+    仅当 "精力" 或 "效率" 之前直接跟着 "+/-数字" 时，才变色
+    - "+2精力" → 红色
+    - "-3效率" → 蓝色
+    其他情况保持白色
+    """
+    i = 0
+    while i < len(text):
+        if text[i] in "+-" and i + 1 < len(text) and text[i+1].isdigit():
+            # 读取完整数值
+            num = text[i]
+            i += 1
+            while i < len(text) and text[i].isdigit():
+                num += text[i]
+                i += 1
+
+            # 仅当数值后面是 "精力" 或 "效率" 时才变色
+            if i < len(text) - 1 and text[i:i+2] in ["精力", "效率"]:
+                keyword = text[i:i+2]
+                color = RED if keyword == "精力" else BLUE
+                word = num + keyword  # 让数字在前
+                i += 2
+            else:
+                color = WHITE
+                word = num  # 只是普通数字，不变色
+        else:
+            color = WHITE
+            word = text[i]
+            i += 1
+
+        text_surf = font.render(word, True, color)
+        surface.blit(text_surf, (x, y))
+        x += text_surf.get_width()
+
 def draw_skill_box(chimera, rect):
     # 定义文本框宽度和高度，可以与 rect 相同或者稍宽
     box_width = rect.width + 20
-    box_height = 30
+    box_height = 100
     box_x = rect.centerx - box_width // 2
     box_y = rect.top - box_height - 5  # 在上方 5 像素处
     box_rect = pygame.Rect(box_x, box_y, box_width, box_height)
@@ -169,11 +271,15 @@ def draw_skill_box(chimera, rect):
     s.fill((50,50,50,180))  # 灰色半透明背景
     screen.blit(s, (box_x, box_y))
     
-    # 绘制技能文本
-    skill_text = font.render(chimera.skill_text, True, WHITE)
-    text_rect = skill_text.get_rect(center=(box_rect.centerx, box_rect.centery))
-    screen.blit(skill_text, text_rect)
-
+    # 使用按字符换行的函数
+    lines = wrap_text_chinese(chimera.skill_text, font, box_width - 20)
+    line_height = font.get_linesize()
+    y_offset = box_y + 10
+    for line in lines:
+        render_colored_text(screen, line, font, box_x + 10, y_offset)
+        y_offset += line_height
+        if y_offset > (box_y + box_height - line_height):
+            break
 
 def draw_progress_bar(completed, total=5):
     x, y = PROGRESS_AREA.topleft
@@ -197,39 +303,10 @@ def draw_button(screen):
     btn_rect = btn_text.get_rect(center=BUTTON_RECT.center)
     screen.blit(btn_text, btn_rect)
 
-def show_changes(obj, amount, attribute):
-    """
-    根据对象 obj 和属性名称 attribute 定位显示区域，
-    在该区域上方显示浮动数字（amount），停顿 1 秒后自动消失。
-    参数：
-      obj: 奇美拉对象或任务对象
-      amount: 本次改变的数值（可正可负）
-      attribute: 字符串，表示属性，如 "energy", "efficiency", "progress"
-    """
-    # 默认显示位置
-    display_pos = (0, 0)
-    
-    # 如果对象有 place 属性（即为奇美拉对象）
-    if hasattr(obj, "place") and obj.place is not None:
-        # 在 gamestate.place 中寻找这个 place 的索引
-        index = None
-        for idx, p in enumerate(gamestate.place):
-            if p == obj.place:
-                index = idx
-                break
-        if index is not None:
-            # 取出当前显示的矩形位置
-            pos = current_positions[index]
-            # 计算浮动数字显示位置，取矩形的中心上方 15 像素
-            display_pos = (pos[0] + PLACE_WIDTH // 2, pos[1] - 15)
-    else:
-        # 如果对象没有 place 属性，假设它是任务对象，使用 task_position
-        display_pos = (task_position[0] + TASK_WIDTH // 2, task_position[1] - 15)
-    
+def draw_floating_number(display_pos, change_text, color):
     # 绘制浮动数字：构造显示文本，例如 "+2" 或 "-3"
-    change_text = f"{amount:+}"
     # 创建一个临时表面，使用大字体显示
-    temp_surf = big_font.render(change_text, True, RED)
+    temp_surf = big_font.render(change_text, True, color)
     temp_rect = temp_surf.get_rect(center=display_pos)
     
     # 为实现显示一秒效果，可以先在屏幕上绘制后调用 pygame.time.delay(1000)
