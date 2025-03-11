@@ -5,6 +5,7 @@ import time
 class Chimera:
     normal = False
     skill_text = None
+    is_selectable = True
     def __init__(self, name, efficiency, energy):
         self.name = name
         self.efficiency = efficiency
@@ -45,7 +46,7 @@ class Chimera:
         >>> tasks[0].completed_chimera is chimeras[0]
         True
         """
-        self.show_text(gamestate)
+        #publish("chimera_skill_triggered", chimera=self, skill_text=self.skill)
         gamestate.tasks[0].do_progress(self.efficiency, gamestate)
         self.reduce_energy(gamestate.tasks[0].consumption, gamestate)
         if gamestate.tasks[0].is_completed():
@@ -65,24 +66,19 @@ class Chimera:
     
     def reduce_energy(self, amount, gamestate):
         self.energy -= amount
-        publish("attribute_change", obj=self, amount=-amount, attribute="energy")
+        publish("attribute_change", obj=self, amount=-amount, gamestate=gamestate, attribute="energy")
 
     def increase_energy(self, amount, gamestate):
         self.energy += amount
-        publish("attribute_change", obj=self, amount=amount, attribute="energy")
+        publish("attribute_change", obj=self, amount=amount, gamestate=gamestate, attribute="energy")
 
     def reduce_efficiency(self, amount, gamestate):
         self.efficiency -= amount
-        publish("attribute_change", obj=self, amount=-amount, attribute="efficiency")
+        publish("attribute_change", obj=self, amount=-amount, gamestate=gamestate, attribute="efficiency")
 
     def increase_efficiency(self, amount, gamestate):
         self.efficiency += amount
-        publish("attribute_change", obj=self, amount=amount, attribute="efficiency")
-
-    def show_text(self, gamestate):
-        publish("show_skill", chimera=self)  # 显示技能
-        time.sleep(1) 
-        publish("hide_skill", chimera=self)  # 隐藏技能
+        publish("attribute_change", obj=self, amount=amount, gamestate=gamestate, attribute="efficiency")
 
     def debut(self, gamestate):#why????
         pass
@@ -170,9 +166,9 @@ class ToughCookie(Chimera):
         6
         """
         super().reduce_energy(amount, gamestate)
-        if self.place.next.chimera:
+        if self.place.next and self.place.next.chimera:
             self.place.next.chimera.increase_efficiency(1, gamestate)
-        if self.place.last.chimera:
+        if self.place.last and self.place.last.chimera:
             self.place.last.chimera.increase_efficiency(1, gamestate)
 
 class AbsenteeFreak(Chimera):

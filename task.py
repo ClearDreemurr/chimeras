@@ -16,7 +16,7 @@ class Task:
 
     def do_progress(self, amount, gamestate):
         self.progress+=amount
-        publish("attribute_change", obj=self, amount=amount, attribute="progress")
+        publish("attribute_change", obj=self, amount=amount, gamestate=gamestate, attribute="progress")
 
     def turn_task(self, turn):
         if turn > 0:
