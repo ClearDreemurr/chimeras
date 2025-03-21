@@ -402,7 +402,7 @@ def draw_floating_number(display_pos, change_text, color):
     # 保存当前屏幕，绘制数字，然后等待 1 秒，再恢复背景（这里较为简化）
     screen.blit(temp_surf, temp_rect)
     pygame.display.update()
-    pygame.time.delay(1000)
+    pygame.time.delay(200)
     pygame.draw.rect(screen, WHITE, temp_rect)
     pygame.display.update(temp_rect)
 

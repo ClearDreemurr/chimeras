@@ -9,7 +9,7 @@ def main():
     while turn <= 12: #工作一拱持续12轮
         selected_team, leader= show_selection_gui(chimeras, leaders) #得到用户选择的奇美拉和领队
         gs = GameState(selected_team, tasks, leader) #本轮回合由selected_team 进行第turn轮工作
-        gs = main_loop(gs)
+        gs = main_loop(gs) #一轮工作
         back(chimeras, gs.chimeras) #将gamestate中剩余的奇美拉归队，保留他们的状态，如果某只奇美拉的is_resting()返回True的则显示精力耗尽并不可选
         if gs.complete(): #如果工作完成了
             turn += 1 #回合数加一，进入下一轮

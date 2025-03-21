@@ -1,7 +1,6 @@
 import random
-import math
 from event_manager import publish
-import time
+
 class Chimera:
     normal = False
     skill_text = None
@@ -321,9 +320,9 @@ class SmallGroup(Chimera):
         """
         up = [self.place.last, self.place.last.last]
         for place in gamestate.place:
-            if place in up:
+            if place in up and place.chimera:
                 place.chimera.increase_efficiency(1, gamestate)
-            elif place is not self.place:
+            elif place is not self.place and place.chimera:
                 place.chimera.reduce_energy(1, gamestate)
 
 class EmptyPromises(Chimera):
