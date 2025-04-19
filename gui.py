@@ -113,7 +113,7 @@ GREEN = (34, 139, 34)
 # 左侧区域用于显示 place（奇美拉）队列
 LEFT_AREA = pygame.Rect(120, 50, int(WIDTH * 0.65), HEIGHT - 150)
 RIGHT_AREA = pygame.Rect(LEFT_AREA.right + 20, 50, WIDTH - LEFT_AREA.right - 70, HEIGHT - 150)
-LEADER_DISPLAY_AREA = pygame.Rect(100, 200, 200, 150)
+LEADER_DISPLAY_AREA = pygame.Rect(100, 100, 200, 150)
 PROGRESS_AREA = pygame.Rect(WIDTH * 0.35, 10, WIDTH * 0.3, 20)
 
 # 定义“下一回合”按钮区域
@@ -402,7 +402,7 @@ def draw_floating_number(display_pos, change_text, color):
     # 保存当前屏幕，绘制数字，然后等待 1 秒，再恢复背景（这里较为简化）
     screen.blit(temp_surf, temp_rect)
     pygame.display.update()
-    pygame.time.delay(200)
+    pygame.time.delay(500)
     pygame.draw.rect(screen, WHITE, temp_rect)
     pygame.display.update(temp_rect)
 

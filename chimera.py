@@ -1,4 +1,3 @@
-import random
 from event_manager import publish
 
 class Chimera:
